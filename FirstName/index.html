@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
+</head>
+
+<body>
+
+    <script>
+        const gameState = {
+            amountBullet: 3,
+        };
+        var keyMove = 1; // 0: pause, 1: play
+        var lastFired = 0;
+        var playerOldX = 0;
+        var playerMain = null;
+
+    class Level1 extends Phaser.Scene {
+        constructor() { 
+            super({ key: 'Level1' })
+        }
+
+        
+        
+        preload() {
+            this.load.spritesheet('dude', 'dude.png', {
+                frameWidth: 32,
+                frameHeight: 48
+            });
+            this.load.spritesheet('slime', 'topdown_shooter/topdown_shooter/monster/slime1_front.png', {
+                frameWidth: 16,
+                frameHeight: 16
+            });
+            this.load.image('platform', 'https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/Cave+Crisis/platform.png');
+            this.load.image('sky', 'Final/Assets/Background_2.png');
+            this.load.image('bg1', 'https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/Codey+Tundra/trees.png');
+            this.load.image('bg2', 'https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/Codey+Tundra/snowdunes.png');
+            this.load.image('bullet', 'topdown_shooter/topdown_shooter/other/bulletc.png');
+            this.load.image('spike', 'Spike.png');
+            this.load.image('mountain', 'Glacial-mountains-parallax-background_vnitti_v3/Glacial-mountains-parallax-background_vnitti/Layers/glacial_mountains_lightened.png');
+            this.load.image('platform2', 'platform2.png');
+            this.load.image('endpoint', 'End.png');
+            this.load.image('ammo', 'ammo.png');
+        }
+
+        create() {
+            //BackGround
+            this.add.image(0, 0, 'sky').setOrigin(0, 0).setScale(5);
+            this.add.image(0, -400, 'mountain').setOrigin(0, 0).setScale(6);
+            this.add.image(0, 0, 'bg1').setOrigin(0, 0);
+            this.add.image(1300, 0, 'bg1').setOrigin(0, 0);
+            this.add.image(0, 0, 'bg2').setOrigin(0, 0);
+
+
+            //Platform
+            const platform = this.physics.add.staticGroup();
+            platform.create(100, 575, 'platform');
+            platform.create(300, 575, 'platform');
+            platform.create(500, 575, 'platform');
+            platform.create(700, 575, 'platform');
+            platform.create(900, 575, 'platform');
+            platform.create(1100, 575, 'platform');
+            platform.create(1300, 575, 'platform');
+            platform.create(1500, 575, 'platform');
+            platform.create(1700, 575, 'platform');
+            platform.create(1900, 575, 'platform'); 
+
+            platform.create(1700, 275, 'platform');
+            platform.create(1400, 275, 'platform');
+            platform.create(1100, 275, 'platform');
+            platform.create(800, 275, 'platform');
+            platform.create(400, 275, 'platform');
+            platform.create(100, 275, 'platform');
+
+            //Platform2
+            const platform2 = this.physics.add.staticGroup();
+            platform2.create(900, 500 -20,'platform2');
+            platform2.create(850, 480 -20,'platform2');
+            platform2.create(800, 460 -20,'platform2');
+            platform2.create(750, 440 -20,'platform2');
+            platform2.create(700, 420 -20,'platform2');
+            platform2.create(650, 400 -20,'platform2');
+
+            //Spike
+            const spikes = this.physics.add.staticGroup();
+            spikes.create(200, 575 - 32, 'spike').setScale(2);
+            spikes.create(232, 575 - 32, 'spike').setScale(2);
+            spikes.create(1300, 575 - 32, 'spike').setScale(2);
+            spikes.create(1332, 575 - 32, 'spike').setScale(2);
+            spikes.create(1364, 575 - 32, 'spike').setScale(2);
+            spikes.create(1396, 575 - 32, 'spike').setScale(2);
+            spikes.create(1428, 575 - 32, 'spike').setScale(2);
+            spikes.create(1460, 575 - 32, 'spike').setScale(2);
+            spikes.create(1492, 575 - 32, 'spike').setScale(2);
+            spikes.create(1524, 575 - 32, 'spike').setScale(2);
+            spikes.create(1556, 575 - 32, 'spike').setScale(2);
+            spikes.create(1588, 575 - 32, 'spike').setScale(2);
+            spikes.create(1620, 575 - 32, 'spike').setScale(2);
+            spikes.create(1652, 575 - 32, 'spike').setScale(2);
+            spikes.create(1684, 575 - 32, 'spike').setScale(2);
+            spikes.create(1716, 575 - 32, 'spike').setScale(2);
+            spikes.create(1748, 575 - 32, 'spike').setScale(2);
+            spikes.create(1780, 575 - 32, 'spike').setScale(2);
+            spikes.create(1812, 575 - 32, 'spike').setScale(2);
+            spikes.create(1844, 575 - 32, 'spike').setScale(2);
+            spikes.create(1876, 575 - 32, 'spike').setScale(2);
+            spikes.create(1908, 575 - 32, 'spike').setScale(2);
+            spikes.create(1940, 575 - 32, 'spike').setScale(2);
+
+            spikes.create(400, 275 - 32, 'spike').setScale(2);
+            spikes.create(800, 275 - 32, 'spike').setScale(2);
+            spikes.create(832, 275 - 32, 'spike').setScale(2);
+            spikes.create(800 - 32, 275 - 32, 'spike').setScale(2);
+            spikes.create(1000 + 16, 275 - 32, 'spike').setScale(2);
+            spikes.create(1200 - 16, 275 - 32, 'spike').setScale(2);
+            spikes.create(1500 - 16, 275 - 32, 'spike').setScale(2);
+            spikes.create(1600 + 36, 275 - 32, 'spike').setScale(2);
+
+            //Bullet
+            // Create 1 class bullet
+            var Bullet = new Phaser.Class({
+
+                Extends: Phaser.Physics.Arcade.Image,
+
+                initialize:
+
+                    function Bullet(scene) {
+                        // Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+                        Phaser.Physics.Arcade.Image.call(this, scene, 0, 0, 'bullet');
+
+                        this.speed = Phaser.Math.GetSpeed(400, 1);
+                    },
+
+                fire: function (x, y, type) {
+                    this.type = type;
+                    gameState.amountBullet -= 1;
+                    this.setPosition(x, y + 12);
+                    playerOldX = x;
+                    this.setActive(true);
+                    this.setVisible(true);
+                },
+
+                update: function (time, delta) {
+                    if (this.type === 'R') {
+                        this.x += this.speed * delta;
+                    } else if (this.type === 'L') {
+                        this.x -= this.speed * delta;
+                    }
+
+                    if (this.x > playerOldX + 300 || this.x < playerOldX - 300) {
+                        this.setActive(false);
+                        this.setVisible(false);
+                    }
+                }
+
+            });
+
+            gameState.bullets = this.physics.add.group({
+                classType: Bullet,
+                maxSize: 2,
+                runChildUpdate: true
+            });
+            gameState.bullet = gameState.bullets.get();
+            gameState.bullet.body.setAllowGravity(false);
+
+
+            //Players
+            let player = this.physics.add.sprite(50, 500, 'dude');
+            player.setBounce(0.2);
+
+            this.cameras.main.startFollow(player, true, 0.5, 0.5);
+            this.cameras.main.setBounds(0, 0, 2000, 600);
+
+            this.physics.add.collider(player, platform);
+            this.physics.add.collider(player, platform2);
+            this.physics.add.overlap(player, spikes, () => {
+                this.add.text(player.x + 10, player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                slime1Move.pause();
+                slime2Move.pause();
+                slime3Move.pause();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = 0;
+                });
+                keyMove = 0;
+            });
+            player.setCollideWorldBounds(true);
+            this.physics.world.setBounds(0, 0, 2000, 600);
+
+            //Ammo
+            let ammos1 = this.physics.add.sprite(100, 275 - 48, 'ammo');
+            ammos1.body.setAllowGravity(false);
+
+            this.physics.add.collider(player, ammos1, () => {
+                ammos1.destroy();
+                gameState.amountBullet += 6;
+            });
+
+            //Enemies
+            let slimes1 = this.physics.add.sprite(300, 500, 'slime').setScale(3);
+            let slimes2 = this.physics.add.sprite(475, 225, 'slime').setScale(1);
+            let slimes3 = this.physics.add.sprite(1500 -25, 275 - 60, 'slime').setScale(2);
+
+            this.physics.add.collider(slimes1, platform);
+            this.physics.add.collider(slimes2, platform);
+            this.physics.add.collider(slimes3, platform);
+
+
+
+            //MoveSlimes
+            var slime1Move = this.tweens.add({
+                targets: slimes1,
+                x: 700,
+                duration: 3000,
+                ease: 'Linear',
+                repeat: -1,
+                yoyo: true
+            });
+
+            var slime2Move = this.tweens.add({
+                targets: slimes2,
+                x: 320,
+                duration: 1000,
+                ease: 'Linear',
+                repeat: -1,
+                yoyo: true
+            });
+
+            var slime3Move = this.tweens.add({
+                targets: slimes3,
+                x: 1300 +25,
+                duration: 700,
+                ease: 'Linear',
+                repeat: -1,
+                yoyo: true
+            });
+            //TouchSlimes
+            this.physics.add.overlap(slimes1, player, () => {
+                this.add.text(player.x + 10, player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                slime1Move.pause();
+                slime2Move.pause();
+                slime3Move.pause();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = 0;
+                });
+                keyMove = 0;
+            });
+
+            this.physics.add.overlap(slimes1,gameState.bullets, () => {
+                slimes1.destroy();
+            });
+
+            this.physics.add.overlap(slimes2, player, () => {
+                this.add.text(player.x + 10, player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                slime1Move.pause();
+                slime2Move.pause();
+                slime3Move.pause();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = 0;
+                });
+                keyMove = 0;
+            });
+
+            this.physics.add.overlap(slimes2, gameState.bullets, () => {
+                slimes2.destroy();
+            });
+
+            this.physics.add.overlap(slimes3, player, () => {
+                this.add.text(player.x + 10, player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                slime1Move.pause();
+                slime2Move.pause();
+                slime3Move.pause();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = 0;
+                });
+                keyMove = 0;
+            });
+
+            this.physics.add.overlap(slimes3, gameState.bullets, () => {
+                slimes3.destroy();
+            });
+
+            // createSnow
+
+            // create animations
+            this.anims.create({
+                key: 'move',
+                frames: this.anims.generateFrameNumbers('dude', {
+                    start: 0,
+                    end: 3
+                }),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            this.anims.create({
+                key: 'idle',
+                frames: [{
+                    key: 'dude',
+                    frame: 4
+                }],
+                frameRate: 20
+            });
+
+            
+
+            //End Point
+            let endPoint = this.physics.add.sprite(1964 + 18, 575 - 54, 'endpoint');
+            endPoint.body.setAllowGravity(false);
+
+            this.physics.add.overlap(player, endPoint, () => {
+                this.add.text(player.x - 400, player.y - 40, 'Win Game...\n  Click to Continue.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                player.setTint('0xff0000')
+                this.physics.pause();
+                slime1Move.pause();
+                slime2Move.pause();
+                slime3Move.pause();
+                player.setTint('0x2FFF00');
+                gameState.saveBullet = gameState.amountBullet;
+                this.input.on('pointerdown', () => {
+			        this.scene.stop('Level1')
+                    this.scene.start('Level2')
+		        })
+            });
+
+            playerMain = player;
+        }
+
+        
+
+        update(time) {
+            var cursors = this.input.keyboard.createCursorKeys();
+            if (keyMove === 1) {
+                if (cursors.left.isDown) {
+                    playerMain.setVelocityX(-200);
+                    playerMain.anims.play('move', true);
+                    playerMain.flipX = false;
+                } else if (cursors.right.isDown) {
+                    playerMain.setVelocityX(200);
+                    playerMain.anims.play('move', true);
+                    playerMain.flipX = true;
+                } else {
+                    playerMain.setVelocityX(0);
+                    playerMain.anims.play('idle', true);
+                }
+
+                // Jump
+                if (cursors.up.isDown && playerMain.body.touching.down) {
+                    playerMain.setVelocityY(-500);
+                }
+
+                // Shoot
+                if (cursors.space.isDown && time > lastFired && cursors.right.isDown && gameState.amountBullet >0) {
+                    
+                    gameState.bullet = gameState.bullets.get();
+
+                    if (gameState.bullet !== null) {
+                        gameState.bullet.body.setAllowGravity(false);
+
+                        if (gameState.bullet) {
+                            gameState.bullet.fire(playerMain.x, playerMain.y, 'R');
+
+                            lastFired = time + 50;
+                        }
+                    };
+                };
+
+                if (cursors.space.isDown && time > lastFired && cursors.left.isDown && gameState.amountBullet > 0) {
+                    
+                    gameState.bullet = gameState.bullets.get();
+
+                    if (gameState.bullet !== null) {
+                        gameState.bullet.body.setAllowGravity(false);
+
+                        if (gameState.bullet) {
+                            gameState.bullet.fire(playerMain.x, playerMain.y, 'L');
+
+                            lastFired = time + 50;
+                        }
+                    };
+                };
+
+            }
+        }
+        
+    }
+    var ammo = gameState.amountBullet;
+    class Level2 extends Phaser.Scene {
+        constructor() {
+            super({key :'Level2'})
+        }
+        preload() {
+            
+            this.load.spritesheet('dude', 'dude.png', {
+                frameWidth: 32,
+                frameHeight: 48
+            });
+            this.load.spritesheet('slime', 'topdown_shooter/topdown_shooter/monster/slime1_front.png', {
+                frameWidth: 16,
+                frameHeight: 16
+            });
+            this.load.image('platform', 'https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/Cave+Crisis/platform.png');
+            this.load.image('platform2', 'platform2.png');
+            this.load.image('bullet', 'topdown_shooter/topdown_shooter/other/bulletc.png');
+            this.load.image('spike', 'Spike.png');
+            this.load.image('spike2', 'Spike2.png');
+            this.load.image('spike3', 'Spike3.png');
+            this.load.image('spike4', 'Spike4.png');
+            this.load.image('endpoint', 'End.png');
+            this.load.image('ammo', 'ammo.png');  
+            this.load.image('cave', 'cave_background.png');
+            this.load.spritesheet('Bat', 'Flight.png', {
+                frameWidth: 150,
+                frameHeight: 37
+            });
+        }
+
+        create() {
+            //BackGround
+            this.add.image(0, 0, 'cave').setOrigin(0, 0).setScale(5);
+            //Platform
+            const platform = this.physics.add.staticGroup();
+            platform.create(100, 675, 'platform');
+            platform.create(500, 575, 'platform');
+            platform.create(700, 575, 'platform');
+            platform.create(900, 575, 'platform');
+            platform.create(1300, 675, 'platform');
+            platform.create(1500, 675, 'platform');
+            platform.create(1900, 675, 'platform');
+            platform.create(2300, 675, 'platform');
+            platform.create(2500, 675, 'platform');
+            platform.create(2700, 675, 'platform');
+
+            //Platform2
+            const platform2 = this.physics.add.staticGroup();
+            var d1 = 36;
+            var d2 = 57;
+            var d3 = 78;
+            var d4 = 99;
+            var d5 = 120;
+            platform2.create(100, 675 + d1, 'platform2');
+            platform2.create(1300, 675 + d1, 'platform2');
+            platform2.create(1500, 675 + d1, 'platform2');
+            platform2.create(2300, 675 + d1, 'platform2');
+            platform2.create(2500, 675 + d1, 'platform2');
+            platform2.create(2700, 675 + d1, 'platform2');
+
+            platform2.create(100, 675 + d2, 'platform2');
+            platform2.create(1300, 675 + d2, 'platform2');
+            platform2.create(1500, 675 + d2, 'platform2');
+            platform2.create(2300, 675 + d2, 'platform2');
+            platform2.create(2500, 675 + d2, 'platform2');
+            platform2.create(2700, 675 + d2, 'platform2');
+
+            platform2.create(100, 675 + d3, 'platform2');
+            platform2.create(1300, 675 + d3, 'platform2');
+            platform2.create(1500, 675 + d3, 'platform2');
+            platform2.create(2300, 675 + d3, 'platform2');
+            platform2.create(2500, 675 + d3, 'platform2');
+            platform2.create(2700, 675 + d3, 'platform2');
+
+            platform2.create(100, 675 + d4, 'platform2');
+            platform2.create(150, 675 + d4, 'platform2');
+            platform2.create(1250, 675 + d4, 'platform2');
+            platform2.create(1300, 675 + d4, 'platform2');
+            platform2.create(1500, 675 + d4, 'platform2');
+            platform2.create(1550, 675 + d4, 'platform2');
+            platform2.create(2250, 675 + d4, 'platform2');
+            platform2.create(2300, 675 + d4, 'platform2');
+            platform2.create(2500, 675 + d4, 'platform2');
+            platform2.create(2700, 675 + d4, 'platform2');
+
+            platform2.create(100, 675 + d5, 'platform2');
+            platform2.create(300, 675 + d5, 'platform2');
+            platform2.create(500, 675 + d5, 'platform2');
+            platform2.create(700, 675 + d5, 'platform2');
+            platform2.create(900, 675 + d5, 'platform2');
+            platform2.create(1100, 675 + d5, 'platform2');
+            platform2.create(1300, 675 + d5, 'platform2');
+            platform2.create(1500, 675 + d5, 'platform2');
+            platform2.create(1700, 675 + d5, 'platform2');
+            platform2.create(1900, 675 + d5, 'platform2');
+            platform2.create(2100, 675 + d5, 'platform2');
+            platform2.create(2300, 675 + d5, 'platform2');
+            platform2.create(2500, 675 + d5, 'platform2');
+            platform2.create(2700, 675 + d5, 'platform2');
+            platform2.create(2900, 675 + d5, 'platform2');
+            //Spike
+            gameState.Spike = this.physics.add.staticGroup();
+            var d6 = 3;
+            gameState.Spike.create(300, 675 - d6 + d4 + 5, 'spike').setScale(2);
+            gameState.Spike.create(500, 675 - d6 + d4 +5, 'spike').setScale(2);
+            gameState.Spike.create(700, 675 - d6 + d4 +5, 'spike').setScale(2);
+            gameState.Spike.create(900, 675 - d6 + d4 +5, 'spike').setScale(2);
+            gameState.Spike.create(1100, 675 - d6 + d4 +5, 'spike').setScale(2);
+            gameState.Spike.create(225, 675 - d6 + d3 +5, 'spike').setScale(2);
+
+            gameState.Spike.create(1192, 675 - d6, 'spike2').setScale(1);
+
+            gameState.Spike.create(415, 575 + d1 + d6, 'spike4').setScale(3);
+            gameState.Spike.create(615, 575 + d1 + d6, 'spike4').setScale(3);
+            gameState.Spike.create(815, 575 + d1 + d6, 'spike4').setScale(3);
+            gameState.Spike.create(985, 575 + d1 + d6, 'spike4').setScale(3);
+
+            gameState.Spike.create(1900, 645, 'spike');
+            //Bullet
+            gameState.amountBullet = gameState.saveBullet;
+            var Bullet = new Phaser.Class({
+
+                Extends: Phaser.Physics.Arcade.Image,
+
+            initialize:
+
+                function Bullet(scene) {
+                    // Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+                    Phaser.Physics.Arcade.Image.call(this, scene, 0, 0, 'bullet');
+
+                    this.speed = Phaser.Math.GetSpeed(400, 1);
+                },
+
+            fire: function (x, y, type) {
+                this.type = type;
+                gameState.amountBullet -= 1;
+                this.setPosition(x, y + 12);
+                playerOldX = x;
+                this.setActive(true);
+                this.setVisible(true);
+            },
+
+            update: function (time, delta) {
+                if (this.type === 'R') {
+                    this.x += this.speed * delta;
+                } else if (this.type === 'L') {
+                    this.x -= this.speed * delta;
+                }
+
+                if (this.x > playerOldX + 300 || this.x < playerOldX - 300) {
+                    this.setActive(false);
+                    this.setVisible(false);
+                }
+            }
+
+        });
+
+                gameState.bullets = this.physics.add.group({
+                classType: Bullet,
+                maxSize: 2,
+                runChildUpdate: true
+                });
+                gameState.bullet = gameState.bullets.get();
+                gameState.bullet.body.setAllowGravity(false);
+            
+            //Enemies
+                //Bat
+            gameState.bat1 = this.physics.add.sprite(300, 725, 'Bat');
+            gameState.bat2 = this.physics.add.sprite(1100, 675, 'Bat');
+            gameState.bat3 = this.physics.add.sprite(1975, 735, 'Bat');
+            gameState.bat4 = this.physics.add.sprite(1975, 610, 'Bat');
+            gameState.bat1.body.setAllowGravity(false);
+            gameState.bat2.body.setAllowGravity(false);
+            gameState.bat3.body.setAllowGravity(false);
+            gameState.bat4.body.setAllowGravity(false);
+            //Enemies Move
+            var bat1Move = this.tweens.add({
+                targets: gameState.bat1,
+                x: 1100,
+                duration: 2500,
+                ease: 'Linear',
+                repeat: -1,
+                yoyo: true,
+                onYoyo: function () {
+                    gameState.bat1.flipX = true;
+                },
+                onRepeat: function () {
+                    gameState.bat1.flipX = false;
+                }
+            });
+
+            var bat2Move = this.tweens.add({
+                targets: gameState.bat2,
+                x: 300,
+                duration: 2500,
+                ease: 'Linear',
+                repeat: -1,
+                yoyo: true,
+                onStart: function() {
+                    gameState.bat2.flipX = true;
+                },
+                onYoyo: function () {
+                    gameState.bat2.flipX = false;
+                },
+                onRepeat: function () {
+                    gameState.bat2.flipX = true;
+                }
+            });
+
+            var bat3Move = this.tweens.add({
+                targets: [gameState.bat3 ,gameState.bat4],
+                x: 1800,
+                duration: 1500,
+                ease: 'Linear',
+                repeat: -1,
+                yoyo: true,
+                onStart: function() {
+                    gameState.bat3.flipX = true;
+                    gameState.bat4.flipX = true;
+                },
+                onYoyo: function () {
+                    gameState.bat3.flipX = false;
+                    gameState.bat4.flipX = false;
+                },
+                onRepeat: function () {
+                    gameState.bat3.flipX = true;
+                    gameState.bat4.flipX = true;
+                }
+            });
+            //Enemies Die
+            this.physics.add.overlap(gameState.bat1, gameState.bullet, () => {
+                gameState.bat1.destroy();
+            });
+            this.physics.add.overlap(gameState.bat2, gameState.bullet, () => {
+                gameState.bat2.destroy();
+            });
+            this.physics.add.overlap(gameState.bat3, gameState.bullet, () => {
+                gameState.bat3.destroy();
+            });
+            this.physics.add.overlap(gameState.bat4, gameState.bullet, () => {
+                gameState.bat4.destroy();
+            });
+            //Player
+            gameState.player = this.physics.add.sprite(50, 600, 'dude');
+            gameState.player.setBounce(0.2);
+            gameState.die = 1 // 0: live, 1:die
+
+            this.cameras.main.startFollow(gameState.player, true, 0.5, 0.5);
+            this.cameras.main.setBounds(0, 0, 3000, 800);
+
+            gameState.player.setCollideWorldBounds(true);
+            this.physics.world.setBounds(0, 0, 3000, 800);
+
+            this.physics.add.collider(platform, gameState.player);
+            this.physics.add.collider(platform2, gameState.player);
+
+            this.physics.add.overlap(gameState.player, gameState.Spike, () => {
+                this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = ammo;
+                });
+                keyMove = 0;
+            });
+            this.physics.add.overlap(gameState.player, gameState.bat1, () => {
+                this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = ammo;
+                });
+                keyMove = 0;
+            });
+            this.physics.add.overlap(gameState.player, gameState.bat2, () => {
+                this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = ammo;
+                });
+                keyMove = 0;
+            });
+            this.physics.add.overlap(gameState.player, gameState.bat3, () => {
+                this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = ammo;
+                });
+                keyMove = 0;
+            });
+            this.physics.add.overlap(gameState.player, gameState.bat4, () => {
+                this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = ammo;
+                });
+                keyMove = 0;
+            });
+            //Animations
+            this.anims.create({
+                key: 'move',
+                frames: this.anims.generateFrameNumbers('dude', {
+                    start: 0,
+                    end: 3
+                }),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            this.anims.create({
+                key: 'idle',
+                frames: [{
+                    key: 'dude',
+                    frame: 4
+                }],
+                frameRate: 20
+            });
+
+            this.anims.create({
+                key: 'moveBat',
+                frames: this.anims.generateFrameNumbers('Bat', {
+                    start: 0,
+                    end: 7
+                }),
+                frameRate: 10,
+                repeat: -1
+            });
+            gameState.bat1.anims.play('moveBat', true);
+            gameState.bat2.anims.play('moveBat', true);
+            gameState.bat3.anims.play('moveBat', true);
+            gameState.bat4.anims.play('moveBat', true);
+            //Ammo
+            let ammos1 = this.physics.add.sprite(1400, 675 - 64, 'ammo');
+            ammos1.body.setAllowGravity(false);
+
+            this.physics.add.collider(gameState.player, ammos1, () => {
+                ammos1.destroy();
+                gameState.amountBullet += 6;
+            });
+            //End Point
+            let endPoint = this.physics.add.sprite(2900 + 18, 675 + 74, 'endpoint');
+            endPoint.body.setAllowGravity(false);
+
+            this.physics.add.overlap(gameState.player, endPoint, () => {
+                this.add.text(gameState.player.x - 400, gameState.player.y - 40, 'Win Game...\n  Click to Continue.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000');
+                this.physics.pause();
+                gameState.player.setTint('0x2FFF00');
+                gameState.saveBullet = gameState.amountBullet;
+                this.input.on('pointerdown', () => {
+			        this.scene.stop('Level2')
+			        this.scene.start('Level3')
+		        })
+            });
+        }
+        
+        update(time) {
+            var cursors = this.input.keyboard.createCursorKeys();
+            if (keyMove === 1) {
+                if (cursors.left.isDown) {
+                    gameState.player.setVelocityX(-200);
+                    gameState.player.anims.play('move', true);
+                    gameState.player.flipX = false;
+                } else if (cursors.right.isDown) {
+                    gameState.player.setVelocityX(200);
+                    gameState.player.anims.play('move', true);
+                    gameState.player.flipX = true;
+                } else {
+                    gameState.player.setVelocityX(0);
+                    gameState.player.anims.play('idle', true);
+                }
+
+                // Jump
+                if (cursors.up.isDown && gameState.player.body.touching.down) {
+                    gameState.player.setVelocityY(-500);
+                }
+
+                // Shoot
+                if (cursors.space.isDown && time > lastFired && cursors.right.isDown && gameState.amountBullet > 0) {
+                    
+                    gameState.bullet = gameState.bullets.get();
+
+                    if (gameState.bullet !== null) {
+                        gameState.bullet.body.setAllowGravity(false);
+
+                        if (gameState.bullet) {
+                            gameState.bullet.fire(gameState.player.x, gameState.player.y, 'R');
+
+                            lastFired = time + 50;
+                        }
+                    };
+                };
+
+                if (cursors.space.isDown && time > lastFired && cursors.left.isDown && gameState.amountBullet > 0) {
+                    
+                    gameState.bullet = gameState.bullets.get();
+
+                    if (gameState.bullet !== null) {
+                        gameState.bullet.body.setAllowGravity(false);
+
+                        if (gameState.bullet) {
+                            gameState.bullet.fire(gameState.player.x, gameState.player.y, 'L');
+
+                            lastFired = time + 50;
+                        }
+                    };
+                };
+
+            }
+        }
+    }
+    class Level3 extends Phaser.Scene {
+        constructor() { 
+            super({ key: 'Level3' })
+        }
+    }
+
+        var config = {
+            type: Phaser.AUTO,
+            width: 1000,
+            height: 600,
+            backgroundColor: "#050505",
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: {
+                        y: 1000
+                    },
+                    enableBody: true,
+                }
+            },
+            scene: [Level1, Level2, Level3],
+        };
+
+        var game = new Phaser.Game(config);
+    </script>
+
+</body>
+
+</html>
