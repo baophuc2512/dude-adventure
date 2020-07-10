@@ -17,6 +17,9 @@
         var keyMove = 1; // 0: pause, 1: play
         var lastFired = 0;
         var playerOldX = 0;
+        var bossOldX = 0;
+        var bossOldY = 0;
+        var i = 1;
         class Inventory extends Phaser.Scene {
         constructor() { 
             super({ key: 'Inventory' })
@@ -26,8 +29,8 @@
         }
         create() {
         //Tao Khung
-            this.add.rectangle(0, 400, 1600, 400, 0xfff0f0);
-            this.add.rectangle(0, 100, 2000, 200, 0xf0f0ff);
+            this.add.rectangle(0, 400, 1600, 400, 0xFA5C5C);
+            this.add.rectangle(0, 100, 2000, 200, 0x008BFF);
             this.add.rectangle(1800, 400, 2000, 400, 0x0fff0f);
             this.add.rectangle(350 , 120, 200, 10, 0xffffff);
         //Picture dude
@@ -714,16 +717,16 @@
                 }
             });
             //Enemies Die
-            this.physics.add.overlap(gameState.bat1, gameState.bullet, () => {
+            this.physics.add.overlap(gameState.bat1, gameState.bullets, () => {
                 gameState.bat1.destroy();
             });
-            this.physics.add.overlap(gameState.bat2, gameState.bullet, () => {
+            this.physics.add.overlap(gameState.bat2, gameState.bullets, () => {
                 gameState.bat2.destroy();
             });
-            this.physics.add.overlap(gameState.bat3, gameState.bullet, () => {
+            this.physics.add.overlap(gameState.bat3, gameState.bullets, () => {
                 gameState.bat3.destroy();
             });
-            this.physics.add.overlap(gameState.bat4, gameState.bullet, () => {
+            this.physics.add.overlap(gameState.bat4, gameState.bullets, () => {
                 gameState.bat4.destroy();
             });
             //Player
@@ -968,8 +971,8 @@
                 frameWidth: 38,
                 frameHeight: 38,
             });
-            this.load.spritesheet('Bat', 'Flight.png', {
-                frameWidth: 150,
+            this.load.spritesheet('bat', 'Flight.png', {
+                frameWidth: 50,
                 frameHeight: 37
             });
             this.load.image('mountain', 'Glacial-mountains-parallax-background_vnitti_v3/Glacial-mountains-parallax-background_vnitti/Layers/glacial_mountains_lightened.png');
@@ -977,6 +980,11 @@
             this.load.image('sky', 'Final/Assets/Background_2.png');
             this.load.image('boss','Boss1.png');
             this.load.image('bulletBoss','cannonball.png');
+            this.load.image('button', 'Button.png');
+            this.load.spritesheet('blood', 'blood.png', {
+                frameWidth: 300,
+                frameHeight: 20,
+            });
         }
         create() {
             //BackGround
@@ -1020,8 +1028,28 @@
             platform.create(-400, 775 - 300, 'platform');
             platform.create(2100, 775 - 200, 'platform');
             platform.create(2400, 775 - 300, 'platform');
+            //Spike
+            const spike = this.physics.add.staticGroup();
+            
+            spike.create(2350, 775 - 300 - 36, 'spike').setScale(3);
+            spike.create(175, 775 - 300 - 36, 'spike').setScale(3);
+            spike.create(475, 775 - 300 - 36, 'spike').setScale(3);
+            spike.create(1800, 775 - 300 - 36, 'spike').setScale(3);
+            spike.create(650, 775 - 425 - 12, 'spike').setScale(3);
+            spike.create(1000, 775 - 125 - 12,  'spike').setScale(3);
+            spike.create(1000, 775 - 325 - 8, 'spike').setScale(2);
+            spike.create(1300, 775 - 225 - 12, 'spike').setScale(3);
+            spike.create(1300, 775 - 425 - 12, 'spike').setScale(3);
+            spike.create(2100, 775 - 200 - 36, 'spike').setScale(3);
+            spike.create(-100, 775 - 200 - 36, 'spike').setScale(3);
+
+            spike.create(900 + 15, 775 - 460 + 32, 'spike4').setScale(2);
+            spike.create(1100 - 15, 775 - 460 + 32, 'spike4').setScale(2);
+
+            spike.create(600 + 10, 775 - 300,'spike3').setScale(3);
+
             //Player
-            gameState.player = this.physics.add.sprite(600, 300,'dude');
+            gameState.player = this.physics.add.sprite(1000, 775 - 50,'dude');
             gameState.player.setBounce(0.2);
 
             this.cameras.main.startFollow(gameState.player, true, 0.5, 0.5);
@@ -1031,7 +1059,12 @@
             this.physics.world.setBounds(-500, 0, 3000, 800);
 
             this.physics.add.collider(platform, gameState.player);
+            //Boss
+            gameState.boss = this.physics.add.sprite(1025, 775 - 620, 'boss').setScale(5);
+            gameState.boss.body.setAllowGravity(false);
 
+            gameState.skillBoss1 = Math.floor(Math.random() * 2)+1;
+            
             //Bullet
             gameState.amountBullet = gameState.saveBullet;
             var Bullet = new Phaser.Class({
@@ -1102,25 +1135,126 @@
             },
 
             update: function (time, delta) {
-                if (this.type === 'R') {
+                if (this.type === 1) {
                     this.x += this.speed * delta;
-                } else if (this.type === 'L') {
+                    this.y += this.speed * delta;
+                } else if (this.type === 2) {
                     this.x -= this.speed * delta;
+                    this.y += this.speed * delta;
+                } else if (this.type === 3) {
+                    this.x += this.speed * delta;
+                    this.y += (this.speed * delta) + 6;
+                } else if (this.type === 4) {
+                    this.x -= this.speed * delta;
+                    this.y += (this.speed * delta) + 6;
+                } else if (this.type === 5) {
+                    this.y += (this.speed * delta) + 8;
+                } else if (this.type === 6) {
+                    this.x += this.speed * delta;
+                    this.y += (this.speed * delta) - 4;
+                } else if (this.type === 7) {
+                    this.x -= this.speed * delta;
+                    this.y += (this.speed * delta) - 4;
                 }
+                
 
-                if (this.x > bossOldX + 300 || this.x < bossOldX - 300) {
+                if (this.x > bossOldX + 1400 || this.x < bossOldX - 1400 || this.y > bossOldY + 1400 || this.y < bossOldY - 1400) {
                     this.setActive(false);
                     this.setVisible(false);
                     this.x = 100000;
                 }
             }
             });
-            
-            //Boss
-            gameState.boss = this.physics.add.sprite(1000, 775 - 620, 'boss').setScale(5);
-            gameState.boss.body.setAllowGravity(false);
-        
-            gameState.skillBoss1 = Math.floor(Math.random() * 2)+1;
+            gameState.bulletsBoss = this.physics.add.group({
+                classType: BulletBoss,
+                maxSize: 20,
+                runChildUpdate: true
+            });
+            gameState.bulletBoss = gameState.bulletsBoss.get();
+            gameState.bulletBoss.body.setAllowGravity(false);
+            //Ammo
+            gameState.ammos1 = this.physics.add.sprite(700, 775 - 275, 'ammo');
+            gameState.ammos1.body.setAllowGravity(false);
+
+            gameState.ammos2 = this.physics.add.sprite(1000, 775 - 400, 'ammo');
+            gameState.ammos2.body.setAllowGravity(false);
+
+            gameState.ammos3 = this.physics.add.sprite(-100, 775 - 275, 'ammo');
+            gameState.ammos3.body.setAllowGravity(false);
+
+            //Button to kill Boss
+            gameState.button1 = this.physics.add.sprite(1000, 775 - 490, 'button');
+            gameState.button1.body.setAllowGravity(false);
+
+            gameState.button2 = this.physics.add.sprite(-100, 775 - 32, 'button');
+            gameState.button2.body.setAllowGravity(false);
+
+            gameState.button3 = this.physics.add.sprite(-400, 775 - 32 - 300, 'button');
+            gameState.button3.body.setAllowGravity(false);
+
+            gameState.button4 = this.physics.add.sprite(2450, 775 - 32 - 300, 'button');
+            gameState.button4.body.setAllowGravity(false);
+
+            //Boss Health
+            gameState.bossHealth = this.physics.add.sprite(1000, 250, 'blood');
+            gameState.bossHealth.body.setAllowGravity(false);
+
+            gameState.healthboss = 100;
+            //Enemies
+            gameState.bat1 = this.physics.add.sprite(-425, 775 - 360, 'bat');
+            gameState.bat1.body.setAllowGravity(false);
+
+            gameState.slime1 = this.physics.add.sprite(625, 775 - 200 - 50, 'slime').setScale(3);
+            gameState.slime1.body.setAllowGravity(false); 
+
+            gameState.slime2 = this.physics.add.sprite(2025, 775 - 200 - 50, 'slime').setScale(3);
+            gameState.slime2.body.setAllowGravity(false); 
+            //Bat move
+            var bat1Move = this.tweens.add({
+                targets: gameState.bat1,
+                x: 300,
+                duration: 2500,
+                ease: 'Linear',
+                repeat: -1,
+                yoyo: true,
+                onYoyo: function () {
+                    gameState.bat1.flipX = true;
+                },
+                onRepeat: function () {
+                    gameState.bat1.flipX = false;
+                }
+            });
+            //Slime move
+            var slime1Move = this.tweens.add({
+                targets: gameState.slime1,
+                x: gameState.slime1.x + 160,
+                duration: 2500,
+                ease: 'Linear',
+                repeat: -1,
+                yoyo: true,
+                onYoyo: function () {
+                    gameState.slime1.flipX = true;
+                },
+                onRepeat: function () {
+                    gameState.slime1.flipX = false;
+                }
+            });
+
+            var slime2Move = this.tweens.add({
+                targets: gameState.slime2,
+                x: gameState.slime2.x + 160,
+                duration: 2000,
+                ease: 'Linear',
+                repeat: -1,
+                yoyo: true,
+                onYoyo: function () {
+                    gameState.slime2.flipX = true;
+                },
+                onRepeat: function () {
+                    gameState.slime2.flipX = false;
+                }
+            });
+
             //Player touch boss
             this.physics.add.overlap(gameState.player, gameState.boss, () => {
                 this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
@@ -1141,6 +1275,150 @@
                 });
                 keyMove = 0;
             });
+            //Player touch boss bullet
+            this.physics.add.overlap(gameState.player, gameState.bulletsBoss, () => {
+                this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = ammo;
+                    gameState.skillBoss1 = Math.floor(Math.random() * 2)+1;
+                    gameState.keyBoss1 = 1;
+                });
+                keyMove = 0;
+            });
+            //Player touch button to kill Boss
+            this.physics.add.overlap(gameState.player, gameState.button1, () => {
+                gameState.button1.destroy();
+                gameState.healthboss -= 25;
+            });
+            this.physics.add.overlap(gameState.player, gameState.button2, () => {
+                gameState.button2.destroy();
+                gameState.healthboss -= 25;
+            });
+            this.physics.add.overlap(gameState.player, gameState.button3, () => {
+                gameState.button3.destroy();
+                gameState.healthboss -= 25;
+            });
+            this.physics.add.overlap(gameState.player, gameState.button4, () => {
+                gameState.button4.destroy();
+                gameState.healthboss -= 25;
+            });
+            //Player touch enemies
+            this.physics.add.overlap(gameState.player, gameState.bat1, () => {
+                this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = ammo;
+                    gameState.skillBoss1 = Math.floor(Math.random() * 2)+1;
+                    gameState.keyBoss1 = 1;
+                });
+                keyMove = 0;
+            });
+
+            this.physics.add.overlap(gameState.player, gameState.slime1, () => {
+                this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = ammo;
+                    gameState.skillBoss1 = Math.floor(Math.random() * 2)+1;
+                    gameState.keyBoss1 = 1;
+                });
+                keyMove = 0;
+            });
+
+            this.physics.add.overlap(gameState.player, gameState.slime2, () => {
+                this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = ammo;
+                    gameState.skillBoss1 = Math.floor(Math.random() * 2)+1;
+                    gameState.keyBoss1 = 1;
+                });
+                keyMove = 0;
+            });
+            //Player touch ammo
+            this.physics.add.overlap(gameState.player, gameState.ammos1, () => {
+                gameState.amountBullet += 3;
+                gameState.ammos1.destroy();
+            });
+            this.physics.add.overlap(gameState.player, gameState.ammos2, () => {
+                gameState.amountBullet += 3;
+                gameState.ammos2.destroy();
+            });
+            this.physics.add.overlap(gameState.player, gameState.ammos3, () => {
+                gameState.amountBullet += 3;
+                gameState.ammos3.destroy();
+            });
+            //Player touch spike
+            this.physics.add.overlap(gameState.player, spike, () => {
+                this.add.text(gameState.player.x + 10, gameState.player.y - 40, 'Game Over...\n  Click to play again.', {
+                    fontFamily: 'Arial',
+                    fontSize: 36,
+                    color: '#f00ff0'
+                });
+                gameState.player.setTint('0xff0000')
+                this.physics.pause();
+                this.anims.pauseAll();
+                this.input.on('pointerup', () => {
+                    this.scene.restart();
+                    this.anims.resumeAll();
+                    keyMove = 1;
+                    gameState.amountBullet = ammo;
+                    gameState.skillBoss1 = Math.floor(Math.random() * 2)+1;
+                    gameState.keyBoss1 = 1;
+                });
+                keyMove = 0;
+            });
+            
+            //Enemies touch player`s bullet
+            this.physics.add.overlap(gameState.bat1, gameState.bullets, () => {
+                gameState.bat1.destroy();
+            });
+
+            this.physics.add.overlap(gameState.slime1, gameState.bullets, () => {
+                gameState.slime1.destroy();
+            });
+
+            this.physics.add.overlap(gameState.slime2, gameState.bullets, () => {
+                gameState.slime2.destroy();
+            });
+            
             //Animation
             this.anims.create({
                 key: 'move',
@@ -1160,6 +1438,63 @@
                 }],
                 frameRate: 20
             });
+
+            this.anims.create({
+                key: 'moveBat',
+                frames: this.anims.generateFrameNumbers('bat', {
+                    start: 0,
+                    end: 7
+                }),
+                frameRate: 10,
+                repeat: -1
+            });
+            this.anims.create({
+                key: 'moveSlime',
+                frames: this.anims.generateFrameNumbers('slime', {
+                    start: 0,
+                    end: 3
+                }),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            this.anims.create({
+                key: 'health2',
+                frames: [{
+                    key: 'blood',
+                    frame: 1
+                }],
+                frameRate: 20
+            });
+
+            this.anims.create({
+                key: 'health3',
+                frames: [{
+                    key: 'blood',
+                    frame: 2
+                }],
+                frameRate: 20
+            });
+
+            this.anims.create({
+                key: 'health4',
+                frames: [{
+                    key: 'blood',
+                    frame: 3
+                }],
+                frameRate: 20
+            });
+            this.anims.create({
+                key: 'health5',
+                frames: [{
+                    key: 'blood',
+                    frame: 4
+                }],
+                frameRate: 20
+            });
+            gameState.bat1.anims.play('moveBat', true);
+            gameState.slime2.anims.play('moveSlime', true);
+            gameState.slime1.anims.play('moveSlime', true);
         }
 
         update(time) {
@@ -1214,35 +1549,78 @@
                     };
                 };
             }
+            var timeBossMove = 4000;
+            var amountBulletBoss = 7;
             if (gameState.skillBoss1 == 1 && gameState.keyBoss1 == 1) {
-            var boss1Move = this.tweens.add({
+            gameState.boss1Move = this.tweens.add({
                 targets: gameState.boss,
-                x: 100,
-                duration: 2500,
+                x: gameState.boss.x - 1200,
+                duration: timeBossMove,
                 ease: 'Linear',
                 repeat: 0,
                 yoyo: true,
                 onComplete: function () {
                     gameState.skillBoss1 = Math.floor(Math.random() * 2)+1;
                     gameState.keyBoss1 = 1;
+                    for (i = 1; i <= amountBulletBoss; i++) {
+                        gameState.bulletBoss = gameState.bulletsBoss.get();
+                        gameState.bulletBoss.body.setAllowGravity(false);
+                        gameState.bulletBoss.fire(gameState.boss.x, gameState.boss.y, i);
+                    }
+                },
+                onYoyo: function () {
+                    for (i = 1; i <= amountBulletBoss; i++) {
+                        gameState.bulletBoss = gameState.bulletsBoss.get();
+                        gameState.bulletBoss.body.setAllowGravity(false);
+                        gameState.bulletBoss.fire(gameState.boss.x, gameState.boss.y, i);
+                    }
                 }
             });
             gameState.keyBoss1 = 0;
             }
             if (gameState.skillBoss1 == 2 && gameState.keyBoss1 == 1) {
-            var boss1Move = this.tweens.add({
+            gameState.boss1Move = this.tweens.add({
                 targets: gameState.boss,
-                x: 1500,
-                duration: 2500,
+                x: gameState.boss.x + 1200,
+                duration: timeBossMove,
                 ease: 'Linear',
                 repeat: 0,
                 yoyo: true,
                 onComplete: function () {
                     gameState.skillBoss1 = Math.floor(Math.random() * 2)+1;
                     gameState.keyBoss1 = 1;
+                    for (i = 1; i <= amountBulletBoss; i++) {
+                        gameState.bulletBoss = gameState.bulletsBoss.get();
+                        gameState.bulletBoss.body.setAllowGravity(false);
+                        gameState.bulletBoss.fire(gameState.boss.x, gameState.boss.y, i);
+                    }
+                },
+                onYoyo: function () {
+                    for (i = 1; i <= amountBulletBoss; i++) {
+                        gameState.bulletBoss = gameState.bulletsBoss.get();
+                        gameState.bulletBoss.body.setAllowGravity(false);
+                        gameState.bulletBoss.fire(gameState.boss.x, gameState.boss.y, i);
+                    }
                 }
             });
             gameState.keyBoss1 = 0;
+            }
+            //Health of Boss
+            if (gameState.healthboss == 75) {
+                gameState.bossHealth.anims.play('health2', true);
+            }
+            if (gameState.healthboss == 50) {
+                gameState.bossHealth.anims.play('health3', true);
+                gameState.boss.setTint('0x00FFDC');
+            }
+            if (gameState.healthboss == 25) {
+                gameState.bossHealth.anims.play('health4', true);
+            }
+            if (gameState.healthboss == 0) {
+                gameState.bossHealth.anims.play('health5', true);
+                gameState.boss.destroy();
+                gameState.boss1Move.pause();
+                
             }
         }
     }
